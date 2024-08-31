@@ -1,0 +1,56 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db" // Adjust the path as necessary
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  username      String       @unique
+  email         String       @unique
+  password      String
+  products      Product[]
+  categories    Category[]   // Relationship to categories
+  subCategories SubCategory[] // Relationship to subcategories
+}
+
+model Product {
+  id            Int       @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Float
+  image         Bytes?    // This field stores the image as a BLOB
+  userId        Int
+  categoryId    Int?
+  subCategoryId Int?
+
+  user         User?       @relation(fields: [userId], references: [id])
+  category     Category?   @relation(fields: [categoryId], references: [id])
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
+}
+
+model Category {
+  id            Int          @id @default(autoincrement())
+  name          String       @unique
+  userId        Int          // Added userId to associate categories with users
+  products      Product[]
+  subCategories SubCategory[]
+
+  user          User?        @relation(fields: [userId], references: [id]) // Relationship with User
+}
+
+model SubCategory {
+  id            Int          @id @default(autoincrement())
+  name          String       @unique
+  categoryId    Int
+  userId        Int          // Added userId to associate subcategories with users
+
+  category      Category     @relation(fields: [categoryId], references: [id])
+  products      Product[]
+  user          User?        @relation(fields: [userId], references: [id]) // Relationship with User
+}
